@@ -7,6 +7,7 @@ public class GameManager : MonoBehaviour
     public GameObject enemyPrefab;
     public GameObject enemySword;
     public int[] blocks;
+    public GameObject[] blockObjects;
     //public GameObject swordHolder;
     private static GameManager instance = null;
     public static GameManager Instance {

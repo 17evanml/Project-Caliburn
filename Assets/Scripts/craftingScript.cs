@@ -8,8 +8,7 @@ public class craftingScript : MonoBehaviour
     enum mode { SELECT, CRAFT, SELECTED };
     mode playMode = mode.SELECT;
     //UI Elements
-    public Button getBlock;
-    public Button getJoint;
+    public Button[] blockButtons;
     public Text remaining;
     public Text used;
     public Text nudgeIncText;
@@ -17,14 +16,14 @@ public class craftingScript : MonoBehaviour
     //Crafting REsources
     public int blocksUsed = 0;
     public int blocksRemaining = 0;
-    public GameObject temp;
     //Type of object currently crafting with
     public GameObject currentCraftingMat;
+    public int selectedBlock;
     //The actual instance of crafting object
     public GameObject activeObj;
 
     //REference to camera
-    public GameObject camera;
+    public GameObject cam;
     //Reference to sword
     public GameObject sword;
 
@@ -42,7 +41,12 @@ public class craftingScript : MonoBehaviour
         gm = GameObject.Find("GameManager").GetComponent<GameManager>();
         blocksRemaining = gm.blocks[0];
         sword = GameObject.Find("Sword");
-        getBlock.onClick.AddListener(giveCraftingMat);
+        for (int i = 0; i < blockButtons.Length; i++)
+        {   
+            int index = i;
+            blockButtons[i].onClick.AddListener(() => giveCraftingMat(index));
+        }
+        updateText();
         //getJoint.onClick.AddListener(giveJointMat);
     }
 
@@ -72,8 +76,8 @@ public class craftingScript : MonoBehaviour
         }
         if (Input.GetMouseButton(1))
         {
-            camera.transform.Rotate(0, yRotation, 0, Space.World);
-            camera.transform.Rotate(-xRotation, 0, 0);
+            cam.transform.Rotate(0, yRotation, 0, Space.World);
+            cam.transform.Rotate(-xRotation, 0, 0);
         }
 
         if (Input.GetKeyDown(KeyCode.Escape))
@@ -82,10 +86,10 @@ public class craftingScript : MonoBehaviour
             playMode = mode.SELECT;
 
         }
-        camera.transform.GetChild(0).transform.Translate(0, 0, scrollMove);
+        cam.transform.GetChild(0).transform.Translate(0, 0, scrollMove);
     }
 
-    bool CheckTag()
+    void CheckTag()
     {
 
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -96,53 +100,17 @@ public class craftingScript : MonoBehaviour
 
             if (hitInfo.collider.gameObject.tag == "buildable")
             {
-                if (hitInfo.collider.gameObject.layer == LayerMask.NameToLayer("snapSpot"))
-                {
-                    activeObj.transform.position = hitInfo.transform.position;
-                    activeObj.transform.rotation = hitInfo.transform.rotation;
-                }
-                else
-                {
-                    activeObj.transform.position = hitInfo.point;
-                    activeObj.transform.rotation = Quaternion.LookRotation(hitInfo.normal);
-                    Debug.DrawLine(hitInfo.point, hitInfo.normal * 10, Color.red);
-                }
-
-
+                PositionBlock(hitInfo);
                 if (Input.GetMouseButtonDown(0))
                 {
-                    blocksUsed++;
-                    blocksRemaining--;
-                    gm.blocks[0]--;
-                    DontDestroyOnLoad(activeObj);
-                    if (hitInfo.collider.gameObject.layer == LayerMask.NameToLayer("snapSpot"))
-                    {
-                        hitInfo.transform.parent.GetComponent<swordHierarchyNode>().addChild(activeObj.transform.GetChild(0).GetComponent<swordHierarchyNode>());
-                        activeObj.transform.SetParent(hitInfo.transform.parent);
-
-                    }
-                    else
-                    {
-                        hitInfo.transform.GetComponent<swordHierarchyNode>().addChild(activeObj.transform.GetChild(0).GetComponent<swordHierarchyNode>());
-                        //activeObj.transform.GetChild(0).GetComponent<swordHierarchyNode>().add(new SwordHierarchyTree(activeObj, activeObj.transform.position, activeObj.transform.rotation, hitInfo.transform.GetComponent<swordHierarchyNode>().getSelf()));
-                        activeObj.transform.SetParent(hitInfo.transform);
-
-                    }
-                    //activeObj.transform.SetParent(sword.transform);
-                    GameObject baseObj = activeObj.transform.GetChild(0).gameObject;
-                    recursiveLayerRestore(baseObj);
-                    updateText();
-                    activeObj = null;
-                    giveCraftingMat();
+                    PlaceBlock(hitInfo);
                 }
             }
         }
         else
         {
-            activeObj.transform.position = camera.transform.position;
+            activeObj.transform.position = cam.transform.position;
         }
-        return false;
-
     }
 
     Vector3 tanVector(RaycastHit hit)
@@ -179,14 +147,14 @@ public class craftingScript : MonoBehaviour
         }
     }
 
-    void giveCraftingMat()
+    void giveCraftingMat(int blockIndex)
     {
+        selectedBlock = blockIndex;
         interrupt(playMode);
         playMode = mode.CRAFT;
-        currentCraftingMat = (UnityEngine.GameObject)Resources.Load("block");
-        if (blocksRemaining > 0)
+        if (gm.blocks[blockIndex] > 0)
         {
-            activeObj = Instantiate(currentCraftingMat);
+            activeObj = Instantiate(gm.blockObjects[selectedBlock]);
             activeObj.tag = "craftingObj";
             recursiveLayerChange(LayerMask.NameToLayer("Ignore Raycast"), activeObj);
         }
@@ -195,19 +163,6 @@ public class craftingScript : MonoBehaviour
             interrupt(playMode);
         }
     }
-    void giveJointMat()
-    {
-        interrupt(playMode);
-        playMode = mode.CRAFT;
-        currentCraftingMat = (UnityEngine.GameObject)Resources.Load("joint");
-        if (blocksRemaining > 0)
-        {
-            activeObj = Instantiate(currentCraftingMat);
-            activeObj.tag = "craftingObj";
-            recursiveLayerChange(LayerMask.NameToLayer("Ignore Raycast"), activeObj);
-        }
-    }
-
 
     void SelectBlock()
     {
@@ -241,6 +196,10 @@ public class craftingScript : MonoBehaviour
 
     void updateText()
     {
+        for(int i = 0; i < blockButtons.Length; i++)
+        {
+            blockButtons[i].GetComponentInChildren<Text>().text = ""+ gm.blocks[i];
+        }
         remaining.text = "Blocks Remaining: " + blocksRemaining;
         used.text = "Blocks Used: " + blocksUsed;
         nudgeIncText.text = "Nudge Increment: " + nudgeInc;
@@ -266,8 +225,7 @@ public class craftingScript : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Backspace) && activeObj.name != "baseBlade")
         {
             Destroy(activeObj.transform.parent.gameObject);
-            blocksRemaining += 1;
-            gm.blocks[0] += 1;
+            gm.blocks[selectedBlock] += 1;
             interrupt(playMode);
         }
         if (Input.GetKeyDown(KeyCode.LeftArrow))
@@ -302,6 +260,45 @@ public class craftingScript : MonoBehaviour
         {
             nudgeInc += 0.05f;
         }
+    }
+
+    void PositionBlock(RaycastHit hitInfo)
+    {
+        if (hitInfo.collider.gameObject.layer == LayerMask.NameToLayer("snapSpot"))
+        {
+            activeObj.transform.position = hitInfo.transform.position;
+            activeObj.transform.rotation = hitInfo.transform.rotation;
+        }
+        else
+        {
+            activeObj.transform.position = hitInfo.point;
+            activeObj.transform.rotation = Quaternion.LookRotation(hitInfo.normal);
+        }
+    }
+
+    void PlaceBlock(RaycastHit hitInfo)
+    {
+        gm.blocks[selectedBlock]--;
+        DontDestroyOnLoad(activeObj);
+        if (hitInfo.collider.gameObject.layer == LayerMask.NameToLayer("snapSpot"))
+        {
+            hitInfo.transform.parent.GetComponent<swordHierarchyNode>().addChild(activeObj.transform.GetChild(0).GetComponent<swordHierarchyNode>());
+            activeObj.transform.SetParent(hitInfo.transform.parent);
+
+        }
+        else
+        {
+            hitInfo.transform.GetComponent<swordHierarchyNode>().addChild(activeObj.transform.GetChild(0).GetComponent<swordHierarchyNode>());
+            //activeObj.transform.GetChild(0).GetComponent<swordHierarchyNode>().add(new SwordHierarchyTree(activeObj, activeObj.transform.position, activeObj.transform.rotation, hitInfo.transform.GetComponent<swordHierarchyNode>().getSelf()));
+            activeObj.transform.SetParent(hitInfo.transform);
+
+        }
+        //activeObj.transform.SetParent(sword.transform);
+        GameObject baseObj = activeObj.transform.GetChild(0).gameObject;
+        recursiveLayerRestore(baseObj);
+        updateText();
+        activeObj = null;
+        giveCraftingMat(selectedBlock);
     }
 
 }
