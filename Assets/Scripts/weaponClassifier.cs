@@ -11,7 +11,7 @@ public class weaponClassifier : MonoBehaviour
     public Vector3 CoM;
     public sVector Dist;
     public GameObject sword;
-    public NeuralNetwork nn;
+    //public NeuralNetwork nn;
     public Button[] buttons = new Button[4];
     public Text text;
 
@@ -20,8 +20,8 @@ public class weaponClassifier : MonoBehaviour
     {
         //parseString();
         int[] layers = { 18, 15, 9 };  
-        nn = new NeuralNetwork(9, layers, 3);
-        nn.LearningRate = 1;
+        //nn = new NeuralNetwork(9, layers, 3);
+        //nn.LearningRate = 1;
         buttons[0].onClick.AddListener(button0);
         buttons[1].onClick.AddListener(button1);
         buttons[2].onClick.AddListener(button2);
@@ -348,36 +348,36 @@ public class weaponClassifier : MonoBehaviour
     {
         float[] target = { 1, 0, 0 };
         WritePTron(genString()+"0;");
-        nn.Train(genValues().toArray(), target);
+        //nn.Train(genValues().toArray(), target);
 
     }
     private void button1()
     {
         float[] target = { 0, 1, 0 };
         WritePTron(genString() + "1;");
-        nn.Train(genValues().toArray(), target);
+        //nn.Train(genValues().toArray(), target);
 
     }
     private void button2()
     {
         float[] target = { 0, 0, 1 };
         WritePTron(genString() + "2;");
-        nn.Train(genValues().toArray(), target);
+        //nn.Train(genValues().toArray(), target);
     }
     private void button3()
     {
-        float[] output = nn.feedForward(genValues().toArray());
-        float max = float.MinValue;
-        int index = 0;
-        for (int i = 0; i < output.Length; i++)
-        {
-            if (output[i] > max)
-            {
-                max = output[i];
-                index = i;
-            }
-        }
-        text.text = "Sword: " + output[0] + "\n" + "Hammer: " + output[1] + "\n" + "Axe: " + output[2];
+        ////float[] output = nn.feedForward(genValues().toArray());
+        //float max = float.MinValue;
+        //int index = 0;
+        //for (int i = 0; i < output.Length; i++)
+        //{
+        //    if (output[i] > max)
+        //    {
+        //        max = output[i];
+        //        index = i;
+        //    }
+        //}
+        //text.text = "Sword: " + output[0] + "\n" + "Hammer: " + output[1] + "\n" + "Axe: " + output[2];
     }
 }
 
