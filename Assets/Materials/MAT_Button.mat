@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 6
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: MAT_Button
+  m_Shader: {fileID: -6465566751694194690, guid: 93a96fda5875b4416b56f83c930555cb,
+    type: 3}
+  m_ShaderKeywords: ETC1_EXTERNAL_ALPHA
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - Texture2D_9E93A0C3:
+        m_Texture: {fileID: 2800000, guid: 0bef4d2ebd3944f54990a7ae1af18be2, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Floats:
+    - Vector1_5C296E0B: 0.2
+    - Vector1_99237BB6: 0.05
+    - Vector1_AD582507: 0.05
+    - Vector1_C594C68C: 0.1
+    m_Colors:
+    - Color_48A2D24: {r: 0.24007656, g: 0.5798533, b: 0.7830189, a: 0}
+    - Vector2_2B972E7F: {r: 1, g: 1, b: 1, a: 0}

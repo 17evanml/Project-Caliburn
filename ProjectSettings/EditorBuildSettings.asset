@@ -1,0 +1,14 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1045 &1
+EditorBuildSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/SCN_Arjun.unity
+    guid: 62a56b2cc8417455383dee312137a58a
+  - enabled: 1
+    path: Assets/Scenes/SCN_Evan.unity
+    guid: 9f1db9640341641249643caefa4ddbcd
+  m_configObjects: {}
