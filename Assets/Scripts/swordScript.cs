@@ -32,7 +32,7 @@ public class swordScript : MonoBehaviour
     void Start()
     {
         GameObject baseblock = transform.GetChild(1).GetChild(0).gameObject;
-        hierarchy = new SwordHierarchyTree(baseblock, baseblock.transform.position, baseblock.transform.rotation, null);
+        //hierarchy = new SwordHierarchyTree(baseblock, baseblock.transform.position, baseblock.transform.rotation, null);
         transform.GetChild(1).GetChild(0).GetComponent<swordHierarchyNode>().add(hierarchy);
     }
 

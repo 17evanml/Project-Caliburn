@@ -35,6 +35,8 @@ public class craftingScript : MonoBehaviour
     public float scrollSpeed = 10;
     public Material savedMat;
 
+    private CraftingHistory history = new CraftingHistory();
+
     // Start is called before the first frame update
     void Start()
     {
@@ -85,6 +87,10 @@ public class craftingScript : MonoBehaviour
             interrupt(playMode);
             playMode = mode.SELECT;
 
+        }
+        if(Input.GetKeyDown(KeyCode.L))
+        {
+            history.Undo(gm);
         }
         cam.transform.GetChild(0).transform.Translate(0, 0, scrollMove);
     }
@@ -224,9 +230,7 @@ public class craftingScript : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Backspace) && activeObj.name != "baseBlade")
         {
-            Destroy(activeObj.transform.parent.gameObject);
-            gm.blocks[selectedBlock] += 1;
-            interrupt(playMode);
+            DeleteBlock();
         }
         if (Input.GetKeyDown(KeyCode.LeftArrow))
         {
@@ -255,10 +259,12 @@ public class craftingScript : MonoBehaviour
         if(Input.GetKeyDown(KeyCode.I))
         {
             nudgeInc -= 0.05f;
+            updateText();
         }
         if (Input.GetKeyDown(KeyCode.O))
         {
             nudgeInc += 0.05f;
+            updateText();
         }
     }
 
@@ -282,14 +288,19 @@ public class craftingScript : MonoBehaviour
         DontDestroyOnLoad(activeObj);
         if (hitInfo.collider.gameObject.layer == LayerMask.NameToLayer("snapSpot"))
         {
-            hitInfo.transform.parent.GetComponent<swordHierarchyNode>().addChild(activeObj.transform.GetChild(0).GetComponent<swordHierarchyNode>());
+            swordHierarchyNode node = hitInfo.transform.parent.GetComponent<swordHierarchyNode>();
+            node.addChild(GetNode(activeObj));
+            GetNode(activeObj).SetParent(node);
+            GetNode(activeObj).add(GenerateTree(activeObj, selectedBlock, hitInfo.transform.parent.parent.gameObject));
             activeObj.transform.SetParent(hitInfo.transform.parent);
 
         }
         else
         {
-            hitInfo.transform.GetComponent<swordHierarchyNode>().addChild(activeObj.transform.GetChild(0).GetComponent<swordHierarchyNode>());
-            //activeObj.transform.GetChild(0).GetComponent<swordHierarchyNode>().add(new SwordHierarchyTree(activeObj, activeObj.transform.position, activeObj.transform.rotation, hitInfo.transform.GetComponent<swordHierarchyNode>().getSelf()));
+            swordHierarchyNode node = hitInfo.transform.parent.GetComponent<swordHierarchyNode>();
+            node.addChild(GetNode(activeObj));
+            GetNode(activeObj).SetParent(node);
+            GetNode(activeObj).add(GenerateTree(activeObj, selectedBlock, hitInfo.transform.parent.gameObject));
             activeObj.transform.SetParent(hitInfo.transform);
 
         }
@@ -299,6 +310,24 @@ public class craftingScript : MonoBehaviour
         updateText();
         activeObj = null;
         giveCraftingMat(selectedBlock);
+    }
+
+    swordHierarchyNode GetNode(GameObject g)
+    {
+        return g.transform.GetChild(0).GetComponent<swordHierarchyNode>();
+    }
+    SwordHierarchyTree GenerateTree(GameObject g, int blockIndex, GameObject parent)
+    {
+        return new SwordHierarchyTree(blockIndex, g.transform.position, g.transform.rotation, GetNode(parent).Self);
+    }
+
+    void DeleteBlock()
+    {
+        swordHierarchyNode node = GetNode(activeObj.transform.parent.gameObject);
+        history.Add(new Delete(node.Self, node.GetParent()));
+        GetNode(activeObj.transform.parent.gameObject).DeleteBlock(gm);
+        updateText();
+        interrupt(playMode);
     }
 
 }

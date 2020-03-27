@@ -4,12 +4,12 @@ using UnityEngine;
 
 public class SwordHierarchyTree
 {
-    GameObject block;
+    int block;
     Vector3 position;
     Quaternion rotation;
     SwordHierarchyTree parent;
     List<SwordHierarchyTree> children = new List<SwordHierarchyTree>();
-    public SwordHierarchyTree(GameObject g, Vector3 pos, Quaternion rot, SwordHierarchyTree p)
+    public SwordHierarchyTree(int g, Vector3 pos, Quaternion rot, SwordHierarchyTree p)
     {
         block = g;
         position = pos;
@@ -25,16 +25,12 @@ public class SwordHierarchyTree
     {
         children.Add(c);
     }
-    public void resetBlock(GameObject g)
-    {
-        block = g;
-    }
     public List<SwordHierarchyTree> getChildren()
     {
         return children;
     }
 
-    public GameObject getBlock()
+    public int getBlock()
     {
         return block;
     }
@@ -49,6 +45,10 @@ public class SwordHierarchyTree
     public SwordHierarchyTree getParent()
     {
         return parent;
+    }
+    public void RemoveChild(SwordHierarchyTree child)
+    {
+        children.Remove(child);
     }
 
     //public string getType()
